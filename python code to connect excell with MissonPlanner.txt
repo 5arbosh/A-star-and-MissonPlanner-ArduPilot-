@@ -1,0 +1,13 @@
+
+import openpyxl as xl
+import numpy as np
+path= r"C:\Users\monta\Desktop\test.xlsx"
+
+wb_obj = xl.load_workbook(path)
+sheet=wb_obj['Sheet1']
+
+
+WPX0=list(sheet.columns)[8]
+WPY0=list(sheet.columns)[9]
+WPX=np.array(WPX0)
+WPY=np.array(WPY0)
