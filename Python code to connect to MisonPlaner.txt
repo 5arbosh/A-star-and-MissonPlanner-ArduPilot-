@@ -1,0 +1,159 @@
+Drone simulation code
+# Dependicies #
+from dronekit import connect, VehicleMode, LocationGlobalRelative, APIException,Command
+
+import time 
+import socket 
+import exceptions
+import math
+import argparse
+from pymavlink import mavutil 
+
+Hwaypoint=10
+
+
+# mission planer connection with dronkit:
+
+##1 dronekit-sitl copter --home=26.433278,50.094026,0,180
+##2 mavproxy.py --master tcp:127.0.0.1:5760 --out udp:127.0.0.1:14551 --out udp:172.20.10.2:14550
+##3 python CISE483.py --connect udp:127.0.0.1:14551
+
+## dronekit-sitl copter --home=26.310018,50.140916,0,180
+
+#getting the data from excel file
+
+import openpyxl as xl
+import numpy as np
+
+
+path= "/home/muntathir/Desktop/cise483.xlsx"
+
+wb_obj = xl.load_workbook(path)
+
+sheet=wb_obj['Sheet1']
+
+
+WPX0=list(sheet.columns)[8]
+WPY0=list(sheet.columns)[9]
+WPX=np.array(WPX0)
+WPY=np.array(WPY0)
+print(WPX[8].value)
+
+
+ #Functions#
+def connectMyCopter():
+
+	parser = argparse.ArgumentParser(description='commands')
+	parser.add_argument('--connect')
+	args = parser.parse_args()
+
+	connection_string=args.connect
+
+	#if not connection_string:
+		#import dronekit_sitl
+		#sitl = dronekit_sitl.start_default()
+		#connection_string = sitl.connection_string()
+	
+	print("Connection to the Vehicle on %s"%connection_string)
+
+	vehicle= connect(connection_string,wait_ready=True)
+
+	return vehicle 
+
+def arm_and_takeoff(targetHeight):
+	while vehicle.is_armable!= True:
+		print("Waiting for vehicle to become armable")
+		time.sleep(1)
+	print("Vehicle is now armable")
+	vehicle.mode = VehicleMode("GUIDED")
+	
+	while vehicle.mode!='GUIDED':
+		print("Waiting for vehicle to enter GUIDED mode")
+	print("Vehicle is now in GUIDED mode")
+	
+	vehicle.armed= True  
+	while vehicle.armed==False:
+		print("Waiting for vehcle to become armed")
+		time.sleep(1)
+	print("Props are spinning")
+
+	vehicle.simple_takeoff(targetHeight) #Hieght in meter#
+	
+	while True:
+		print("current altitude : %d"%vehicle.location.global_relative_frame.alt)
+		if vehicle.location.global_relative_frame.alt>=.95*targetHeight:
+			break
+		time.sleep(1)
+	print("target altitude reached")
+	return None 
+
+
+
+
+
+
+# Main #
+vehicle = connectMyCopter()
+
+wphome=vehicle.location.global_relative_frame
+# COMMAND LIST
+
+
+
+
+#cmd0=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,0,0,0,0,0,0,wphome.lat,wphome.lon,wphome.alt)
+#cmd1=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_TAKEOFF,0,0,0,0,0,0,float(WPX[1].value),float(WPY[1].value),Hwaypoint)
+cmd2=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,0,0,0,0,0,0,float(WPX[2].value),float(WPY[2].value),Hwaypoint)
+cmd3=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,0,0,0,0,0,0,float(WPX[3].value),float(WPY[3].value),Hwaypoint)
+cmd4=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,0,0,0,0,0,0,float(WPX[4].value),float(WPY[4].value),Hwaypoint)
+cmd5=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,0,0,0,0,0,0,float(WPX[5].value),float(WPY[5].value),Hwaypoint)
+cmd6=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,0,0,0,0,0,0,float(WPX[6].value),float(WPY[6].value),Hwaypoint)
+cmd7=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,0,0,0,0,0,0,float(WPX[7].value),float(WPY[7].value),Hwaypoint)
+cmd8=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,0,0,0,0,0,0,float(WPX[8].value),float(WPY[8].value),Hwaypoint)
+cmd9=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,0,0,0,0,0,0,float(WPX[9].value),float(WPY[9].value),Hwaypoint)
+cmd10=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_WAYPOINT,0,0,0,0,0,0,float(WPX[10].value),float(WPY[10].value),Hwaypoint)
+cmd11=Command(0,0,0,mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT,mavutil.mavlink.MAV_CMD_NAV_LAND,0,0,0,0,0,0,float(WPX[11].value),float(WPY[11].value),Hwaypoint)
+#dwonload command list
+cmds = vehicle.commands
+cmds.download()
+cmds.wait_ready()
+#clear 
+cmds.clear()
+#add
+
+
+#cmds.add(cmd1)
+cmds.add(cmd2)
+cmds.add(cmd3)
+cmds.add(cmd4)
+cmds.add(cmd5)
+cmds.add(cmd6)
+cmds.add(cmd7)
+cmds.add(cmd8)
+cmds.add(cmd9)
+cmds.add(cmd10)
+cmds.add(cmd11)
+
+#upload
+vehicle.commands.upload()
+arm_and_takeoff(10)
+
+#vehicle.airspeed =7
+print("after arm and takeoff please put it in auto mode")
+vehicle.mode=VehicleMode("AUTO")
+
+while vehicle.mode!="AUTO":
+	time.sleep(.2)
+while vehicle.location.global_relative_frame.alt>2:
+	print("Drone is excuting mission")
+	time.sleep(2)
+
+# close connection
+
+vehicle.close()
+
+
+
+
+
+
